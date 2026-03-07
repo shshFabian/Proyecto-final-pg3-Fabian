@@ -18,3 +18,4 @@ $usuarios = $model->getAll();
 foreach ($usuarios as $u) {
     echo $u['id_usuario'] . " - " . $u['nombre'] . " - " . $u['rol'] . "\n";
 }
+// prueba
