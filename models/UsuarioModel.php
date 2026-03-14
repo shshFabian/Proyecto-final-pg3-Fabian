@@ -20,4 +20,11 @@ class UsuarioModel {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    public function findByCorreo($correo) {
+    $sql = "SELECT * FROM usuarios WHERE correo = ?";
+    $stmt = Conexion::get()->prepare($sql);
+    $stmt->execute([$correo]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 }
