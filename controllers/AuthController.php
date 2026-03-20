@@ -12,31 +12,23 @@ class AuthController {
     public function login() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-            // 1. Sanitizar inputs
             $correo   = strip_tags(trim($_POST['correo']));
             $password = strip_tags(trim($_POST['password']));
 
-            // 2. Validar que no estén vacíos
             if (empty($correo) || empty($password)) {
                 $error = "Todos los campos son obligatorios.";
                 require_once "views/login.php";
                 return;
             }
 
-            // 3. Buscar usuario en la BD
             $usuario = $this->usuarioModel->findByCorreo($correo);
 
-            // 4. Verificar contraseña
             if ($usuario && password_verify($password, $usuario['password'])) {
-
-                // 5. Iniciar sesión y guardar datos
 
                 $_SESSION['id_usuario'] = $usuario['id_usuario'];
                 $_SESSION['nombre']     = $usuario['nombre'];
                 $_SESSION['rol']        = $usuario['rol'];
 
-                
-                // 6. Redirigir según rol
                 if ($usuario['rol'] === 'admin') {
                     header("Location: index.php?page=dashboard");
                 } elseif ($usuario['rol'] === 'tecnico') {
@@ -56,9 +48,35 @@ class AuthController {
         }
     }
 
-public function logout() {
-    session_destroy();
-    header("Location: index.php");
-    exit();
-}
+    public function logout() {
+        session_destroy();
+        header("Location: index.php");
+        exit();
+    }
+
+    public function register() {
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        if (empty($data['nombre']) || empty($data['correo']) || empty($data['password'])) {
+            echo json_encode(['status' => false, 'message' => 'Todos los campos son obligatorios.']);
+            return;
+        }
+
+        $data['nombre']   = strip_tags(trim($data['nombre']));
+        $data['correo']   = strip_tags(trim($data['correo']));
+        $data['password'] = $data['password'];
+        $data['rol']      = 'cliente';
+
+        $existente = $this->usuarioModel->findByCorreo($data['correo']);
+        if ($existente) {
+            echo json_encode(['status' => false, 'message' => 'Ese correo ya está registrado.']);
+            return;
+        }
+
+        $result = $this->usuarioModel->save($data);
+        echo json_encode([
+            'status'  => $result,
+            'message' => $result ? 'Cuenta creada exitosamente.' : 'Error al registrar.'
+        ]);
+    }
 }

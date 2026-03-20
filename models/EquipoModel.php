@@ -25,4 +25,20 @@ class EquipoModel {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function generarCodigo() {
+    $sql = "SELECT COUNT(*) as total FROM equipos";
+    $stmt = Conexion::get()->prepare($sql);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $numero = str_pad($result['total'] + 1, 3, '0', STR_PAD_LEFT);
+    return "EQ-" . $numero;
+}
+
+public function getByCliente($id_cliente) {
+    $sql = "SELECT * FROM equipos WHERE id_cliente = ?";
+    $stmt = Conexion::get()->prepare($sql);
+    $stmt->execute([$id_cliente]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }
